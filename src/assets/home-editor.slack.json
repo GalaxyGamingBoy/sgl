@@ -1,0 +1,100 @@
+{
+  "type": "home",
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Slack Game Library Editor - Editing Game [[game]]",
+        "emoji": true
+      }
+    },
+    {
+      "type": "rich_text",
+      "elements": [
+        {
+          "type": "rich_text_section",
+          "elements": [
+            {
+              "type": "text",
+              "text": "The editor for the slack game library!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "input",
+      "element": {
+        "type": "plain_text_input",
+        "multiline": true,
+        "action_id": "plain_text_input-action"
+      },
+      "label": {
+        "type": "plain_text",
+        "text": " ",
+        "emoji": true
+      }
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": ":tw_arrow_right: Run",
+            "emoji": true
+          },
+          "action_id": "sgl-editor-run"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": ":floppy_disk: Save",
+            "emoji": true
+          },
+          "action_id": "sgl-editor-save"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": ":card_file_box: Load",
+            "emoji": true
+          },
+          "action_id": "sgl-editor-load"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": ":tw_pencil: Metadata",
+            "emoji": true
+          },
+          "action_id": "sgl-editor-editmetadata"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": ":bookmark_tabs: Programming Reference",
+            "emoji": true
+          },
+          "action_id": "sql-progreference"
+        }
+      ]
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "plain_text",
+          "text": "Editing [[game]] | Made by Marios Mitsios",
+          "emoji": true
+        }
+      ]
+    }
+  ]
+}

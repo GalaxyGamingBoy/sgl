@@ -1,0 +1,79 @@
+{
+  "type": "modal",
+  "callback_id": "sgl-home",
+  "title": {
+    "type": "plain_text",
+    "text": "[SGL] Home",
+    "emoji": true
+  },
+  "close": {
+    "type": "plain_text",
+    "text": "Exit",
+    "emoji": true
+  },
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "Slack Game Library - SGL",
+        "emoji": true
+      }
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "plain_text",
+          "text": "The \"slack\" way for game development.",
+          "emoji": true
+        }
+      ]
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Browse Game Library",
+            "emoji": true
+          },
+          "value": "sgl-home-browse",
+          "action_id": "sgl-home-browse"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Your Saved Data",
+            "emoji": true
+          },
+          "value": "sgl-home-saveddata",
+          "action_id": "sgl-home-saveddata"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Develop a Game",
+            "emoji": true
+          },
+          "value": "sgl-home-developgame",
+          "action_id": "sgl-home-developgame"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Programming Reference",
+            "emoji": true
+          },
+          "value": "sgl-progreference",
+          "action_id": "sgl-home-progreference"
+        }
+      ]
+    }
+  ]
+}

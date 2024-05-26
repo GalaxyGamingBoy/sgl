@@ -1,0 +1,43 @@
+[
+  {
+    "type": "header",
+    "text": {
+      "type": "plain_text",
+      "text": "[[game_title]] - By: [[game_author]] [[[game_rating]]:star:]",
+      "emoji": true
+    }
+  },
+  {
+    "type": "section",
+    "text": {
+      "type": "plain_text",
+      "text": "[[game_desc]]",
+      "emoji": true
+    }
+  },
+  {
+    "type": "actions",
+    "elements": [
+      {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Play!",
+          "emoji": true
+        },
+        "value": "[[game_id]]",
+        "action_id": "sgl-play"
+      },
+      {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "Upvote :star:",
+          "emoji": true
+        },
+        "value": "[[game_id]]",
+        "action_id": "sgl-upvote"
+      }
+    ]
+  }
+]
