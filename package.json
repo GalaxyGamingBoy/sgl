@@ -1,5 +1,5 @@
 {
-  "name": "slack-game-library",
+  "name": "sgl",
   "version": "0.0.1",
   "description": "Implements game library for slack.",
   "main": "dist/index.js",
@@ -15,7 +15,7 @@
   "module": "NodeNext",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GalaxyGamingBoy/slack-game-library.git"
+    "url": "git+https://github.com/GalaxyGamingBoy/sgl.git"
   },
   "keywords": [
     "game",
@@ -25,9 +25,9 @@
   "author": "Marios Mitsios",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/GalaxyGamingBoy/slack-game-library/issues"
+    "url": "https://github.com/GalaxyGamingBoy/sgl/issues"
   },
-  "homepage": "https://github.com/GalaxyGamingBoy/slack-game-library#readme",
+  "homepage": "https://github.com/GalaxyGamingBoy/sgl#readme",
   "dependencies": {
     "@slack/bolt": "^3.18.0",
     "@slack/web-api": "^6.12.0",
