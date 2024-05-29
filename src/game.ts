@@ -27,53 +27,58 @@ class GameApi {
     this.hasInit = false;
   }
 
-  init(): void {}
-  loop(): void {}
-  exit(): void {
-    clearInterval(this._loopInterval);
-    throw Error(`Stopping execution of game ${this._id}`);
-  }
+  init = (): void => {};
+  loop = (): void => {};
 
   workerDriver(): void {
     parentPort?.addListener("message", (message: WorkerMessage) => {
-      if (message.type == WorkerMessageTypes.INIT) {
-        this.logger = winston.createLogger({
-          ...message.data.logger,
-          format: winston.format.prettyPrint(),
-          transports: [
-            new winston.transports.File({
-              filename: `./.workers/.worker-sgl-${message.data.logger.id}.tmp.log`,
-            }),
-          ],
-        });
+      switch (message.type) {
+        case WorkerMessageTypes.INIT:
+          this.logger = winston.createLogger({
+            ...message.data.logger,
+            format: winston.format.prettyPrint(),
+            transports: [
+              new winston.transports.File({
+                filename: `./.workers/.worker-sgl-${message.data.logger.id}.tmp.log`,
+              }),
+            ],
+          });
 
-        this.logger.info("HELLO");
-        this._slack = new bolt.App({
-          ...message.data.slack,
-          logger: {
-            debug: (...msg) => {
-              this.logger!.debug(JSON.stringify(msg), { service: "sgl-slack" });
+          this._slack = new bolt.App({
+            ...message.data.slack,
+            logger: {
+              debug: (...msg) => {
+                this.logger!.debug(JSON.stringify(msg), {
+                  service: "sgl-slack",
+                });
+              },
+              info: (...msg) => {
+                this.logger!.info(JSON.stringify(msg), {
+                  service: "sgl-slack",
+                });
+              },
+              warn: (...msg) => {
+                this.logger!.warn(JSON.stringify(msg), {
+                  service: "sgl-slack",
+                });
+              },
+              error: (...msg) => {
+                this.logger!.error(JSON.stringify(msg), {
+                  service: "sgl-slack",
+                });
+              },
+              setLevel: (lvl) => (this.logger!.level = lvl),
+              getLevel: (): bolt.LogLevel =>
+                this.logger!.level as bolt.LogLevel,
+              setName: () => {},
             },
-            info: (...msg) => {
-              this.logger!.info(JSON.stringify(msg), { service: "sgl-slack" });
-            },
-            warn: (...msg) => {
-              this.logger!.warn(JSON.stringify(msg), { service: "sgl-slack" });
-            },
-            error: (...msg) => {
-              this.logger!.error(JSON.stringify(msg), { service: "sgl-slack" });
-            },
-            setLevel: (lvl) => (this.logger!.level = lvl),
-            getLevel: (): bolt.LogLevel => this.logger!.level as bolt.LogLevel,
-            setName: () => {},
-          },
-        });
+          });
 
-        this.run();
-      }
-
-      if (message.type == WorkerMessageTypes.KILL) {
-        this.exit();
+          this.run();
+          break;
+        case WorkerMessageTypes.KILL:
+          this.exit();
+          break;
       }
     });
   }
@@ -81,7 +86,13 @@ class GameApi {
   run() {
     this.logger!.info(`Executing game with ID: ${this._id}`);
     this.init();
-    this._loopInterval = setInterval(this.loop, this._tick);
+    this._loopInterval = setInterval(() => this.loop(), this._tick);
+  }
+
+  exit(): void {
+    clearInterval(this._loopInterval);
+    this.logger?.info(`Stopping execution of game ${this._id}`);
+    parentPort?.postMessage({ type: WorkerMessageTypes.KILL });
   }
 }
 

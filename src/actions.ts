@@ -41,7 +41,6 @@ actions.push({
           game_id: game.id,
         });
 
-        console.log(block.data);
         return block.data;
       })
       .flat();

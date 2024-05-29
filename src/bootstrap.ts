@@ -7,7 +7,6 @@ import { v4 } from "uuid";
 import { WorkerMessageTypes } from "./game.js";
 import bolt from "@slack/bolt";
 import { Worker } from "worker_threads";
-import WinstonSlackWebhook from "winston-slack-webhook-transport";
 
 export enum BootstrapErrors {
   GAME_FILE_NOT_FOUND,
@@ -102,6 +101,17 @@ class Bootstrap {
       );
 
       const worker = new Worker(`./.workers/.worker-sgl-${this._id}.tmp.js`);
+      worker.addListener(
+        "message",
+        (msg: { type: WorkerMessageTypes; data: any }) => {
+          switch (msg.type) {
+            case WorkerMessageTypes.KILL:
+              this.terminate();
+              break;
+          }
+        },
+      );
+
       worker.postMessage({
         type: WorkerMessageTypes.INIT,
         data: {
@@ -120,14 +130,12 @@ class Bootstrap {
         },
       });
 
-      worker.addListener("messageerror", this.terminate);
-
       this._worker = worker;
     });
   }
 
   terminate() {
-    this._worker!.postMessage({ type: WorkerMessageTypes.KILL, data: {} });
+    console.log(`Game ${this._id} terminated!`);
     this._worker!.terminate();
 
     fs.rmSync(`./.workers/.worker-sgl-${this._id}.tmp.js`);

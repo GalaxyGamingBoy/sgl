@@ -73,9 +73,4 @@ actions.forEach((action) =>
 
 logger.info(`Slack Game Library v${pkg.version}`);
 logger.info(`Slack app running on: ${process.env.PORT || 3000}`);
-// await slack.start(process.env.PORT || 3000);
-
-const bootstrap = new Bootstrap(logger, slack);
-console.log(await bootstrap.from_file("test_games"));
-console.log(bootstrap.parse());
-console.log(bootstrap.execute());
+await slack.start(process.env.PORT || 3000);

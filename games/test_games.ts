@@ -9,11 +9,11 @@ class Game extends GameApi {
     this.idx = 0;
   }
 
-  init(): void {
+  init = (): void => {
     this.logger?.info("Intializing Test Game");
-  }
+  };
 
-  loop(): void {
+  loop = (): void => {
     console.log("LOOP");
     this.logger?.warn("A");
     this.idx++;
@@ -21,5 +21,5 @@ class Game extends GameApi {
     if (this.idx > 12) {
       this.exit();
     }
-  }
+  };
 }
