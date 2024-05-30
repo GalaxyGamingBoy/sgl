@@ -1,6 +1,8 @@
 import "dotenv/config";
 import bolt from "@slack/bolt";
 import winston from "winston";
+import express, { Request, Response } from "express";
+import crypto from "crypto";
 import WinstonSlackWebhook from "winston-slack-webhook-transport";
 import commands from "./commands.js";
 import actions from "./actions.js";
@@ -71,6 +73,79 @@ actions.forEach((action) =>
   ),
 );
 
-logger.info(`Slack Game Library v${pkg.version}`);
-logger.info(`Slack app running on: ${process.env.PORT || 3000}`);
-await slack.start(process.env.PORT || 3000);
+const server = express();
+server.use(express.urlencoded({ extended: false }));
+
+server.post(
+  "/slack/runtime/events",
+  express.raw({ type: "*/*" }),
+  (req: Request, res: Response) => {
+    const ts = req.headers["x-slack-request-timestamp"];
+    const base = `v0:${ts}:${req.body}`;
+
+    const signature = crypto
+      .createHmac(
+        "sha256",
+        Buffer.from(process.env.BOLT_RUNTIME_SIGNING_SECRET || ""),
+      )
+      .update(base)
+      .digest("hex");
+
+    if ("v0=" + signature != req.headers["x-slack-signature"])
+      return res.status(401);
+
+    res.status(200).end(JSON.parse(req.body).challenge);
+
+    bootstrappers.forEach((boot) => boot.sendEvent(req));
+  },
+);
+
+server.post("/slack/runtime/interactivity", (req: Request, res: Response) => {
+  const payload = JSON.parse(req.body.payload);
+
+  if (
+    payload.type == "block_actions" &&
+    bootstrappers.has(payload.actions[0].value)
+  ) {
+    const bootstrapper = bootstrappers.get(payload.actions[0].value);
+
+    if (
+      payload.actions[0].action_id == "sgl_runtime_confirm" &&
+      !bootstrapper?.isRunning
+    ) {
+      logger.info(
+        `User confirmed execution of game with id: ${bootstrapper!.id}, Executing...`,
+      );
+
+      bootstrapper!.triggerId = payload.trigger_id;
+      bootstrapper?.execute();
+    }
+
+    if (
+      payload.actions[0].action_id == "sgl_runtime_terminate" &&
+      bootstrapper?.isRunning
+    ) {
+      logger.info(
+        `User confirmed termination of game with id: ${bootstrapper!.id}, Terminating...`,
+      );
+
+      bootstrapper?.terminate();
+    }
+  }
+
+  delete payload.api_app_id;
+  delete payload.token;
+
+  res.status(200).end();
+
+  bootstrappers.forEach((boot) => boot.sendInteraction(payload));
+});
+
+server.listen(process.env.PORT || 3000);
+logger.info(`Slack Game Library v${pkg.version}`, () =>
+  logger.info(`Slack runtime app running on: ${process.env.PORT || 3000}`),
+);
+
+export const bootstrappers: Map<string, Bootstrap> = new Map();
+
+await slack.start();

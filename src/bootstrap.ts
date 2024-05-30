@@ -7,6 +7,10 @@ import { v4 } from "uuid";
 import { WorkerMessageTypes } from "./game.js";
 import bolt from "@slack/bolt";
 import { Worker } from "worker_threads";
+import { Request } from "express";
+import { Block } from "./blocks.js";
+import slkConfirmRun from "./assets/confirm-run.slack.json" with { type: "json" };
+import { WebClient } from "@slack/web-api";
 
 export enum BootstrapErrors {
   GAME_FILE_NOT_FOUND,
@@ -21,20 +25,33 @@ class Bootstrap {
   private _code?: string;
   private _transpiledCode?: ts.TranspileOutput;
   private _logger: winston.Logger;
-  private _slack: bolt.App;
+  private _slack: WebClient;
   private _id: string;
   private _worker?: Worker;
+  private _triggerId?: string;
 
-  constructor(logger: winston.Logger, slack: bolt.App) {
+  constructor(logger: winston.Logger, slack: WebClient) {
     this._logger = logger;
     this._slack = slack;
     this._id = v4();
+  }
+
+  get id(): string {
+    return this._id;
   }
 
   get parseErrors(): string[] {
     return (this._transpiledCode?.diagnostics || []).map((diag) =>
       ts.flattenDiagnosticMessageText(diag.messageText, "\n"),
     );
+  }
+
+  get isRunning(): boolean {
+    return this._worker != undefined;
+  }
+
+  set triggerId(triggerId: string) {
+    this._triggerId = triggerId;
   }
 
   async from_file(filename: string): Promise<BootstrapErrors | void> {
@@ -91,6 +108,23 @@ class Bootstrap {
       return BootstrapErrors.TYPESCRIPT_PARSE_ERROR;
   }
 
+  confirm_run(user: string, channel: string, author: string, name?: string) {
+    const block = new Block(slkConfirmRun);
+    block.fill({
+      name: name ? name : this._id,
+      author: author,
+      id: this._id,
+    });
+
+    this._slack.chat.postEphemeral({
+      user: user,
+      channel: channel,
+      token: process.env.BOLT_RUNTIME_ORG_TOKEN,
+      blocks: (block.data as { blocks: bolt.Block[] }).blocks,
+      text: "Please use slack with a machine that can render blocks",
+    });
+  }
+
   execute(): BootstrapErrors | void {
     if (!this._transpiledCode) return BootstrapErrors.NO_TRANSPILED_CODE;
 
@@ -101,8 +135,10 @@ class Bootstrap {
       );
 
       const worker = new Worker(`./.workers/.worker-sgl-${this._id}.tmp.js`);
+
       worker.addListener(
         "message",
+        // eslint-disable-next-line
         (msg: { type: WorkerMessageTypes; data: any }) => {
           switch (msg.type) {
             case WorkerMessageTypes.KILL:
@@ -122,15 +158,30 @@ class Bootstrap {
           },
           slack: {
             signingSecret: process.env.BOLT_RUNTIME_SIGNING_SECRET,
-            clientSecret: process.env.BOLT_RUNTIME_CLIENT_SECRET,
-            appToken: process.env.BOLT_RUNTIME_APP_TOKEN,
             token: process.env.BOLT_RUNTIME_ORG_TOKEN,
-            socketMode: true,
           },
         },
       });
 
       this._worker = worker;
+    });
+  }
+
+  sendEvent(req: Request) {
+    if (!this._worker) return;
+
+    this._worker!.postMessage({
+      type: WorkerMessageTypes.BOLT_EVENT,
+      data: JSON.parse(req.body),
+    });
+  }
+
+  sendInteraction(payload: object) {
+    if (!this._worker) return;
+
+    this._worker!.postMessage({
+      type: WorkerMessageTypes.BOLT_INTERACTION,
+      data: payload,
     });
   }
 

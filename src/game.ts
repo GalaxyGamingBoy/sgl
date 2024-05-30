@@ -1,30 +1,36 @@
 import winston from "winston";
 import bolt from "@slack/bolt";
 import { parentPort } from "worker_threads";
-import WinstonSlackWebhook from "winston-slack-webhook-transport";
+import EventEmitter from "events";
 
 export enum WorkerMessageTypes {
   INIT,
   KILL,
+  BOLT_EVENT,
+  BOLT_INTERACTION,
 }
 
 export interface WorkerMessage {
   type: WorkerMessageTypes;
+
+  // eslint-disable-next-line
   data: any;
 }
 
 class GameApi {
-  _id: string;
-  _tick: number;
-  _slack?: bolt.App;
-  _loopInterval?: NodeJS.Timeout;
+  private _id: string;
+  private _tick: number;
+  private _slack?: bolt.App;
+  private _loopInterval?: NodeJS.Timeout;
   logger?: winston.Logger;
   hasInit: boolean;
+  slackEvents: EventEmitter;
 
   constructor(id: string, tick: number = 200) {
     this._id = id;
     this._tick = tick;
     this.hasInit = false;
+    this.slackEvents = new EventEmitter();
   }
 
   init = (): void => {};
@@ -75,6 +81,14 @@ class GameApi {
           });
 
           this.run();
+          break;
+        case WorkerMessageTypes.BOLT_EVENT:
+          if (this.slackEvents.eventNames().includes(message.data.event.type))
+            this.slackEvents.emit(message.data.event.type, message.data.event);
+          break;
+        case WorkerMessageTypes.BOLT_INTERACTION:
+          if (this.slackEvents.eventNames().includes(message.data.type))
+            this.slackEvents.emit(message.data.type, message.data);
           break;
         case WorkerMessageTypes.KILL:
           this.exit();

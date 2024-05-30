@@ -1,7 +1,7 @@
 export class Block {
-  private _data: Object;
+  private _data: object;
 
-  constructor(data: Object) {
+  constructor(data: object) {
     this._data = data;
   }
 
@@ -15,7 +15,7 @@ export class Block {
     this._data = JSON.parse(data);
   }
 
-  get data(): Object {
+  get data(): object {
     return this._data;
   }
 }

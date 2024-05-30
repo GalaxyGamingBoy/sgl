@@ -1,3 +1,4 @@
+import { ModalView } from "@slack/web-api";
 import GameApi from "../src/game.js";
 
 class Game extends GameApi {
@@ -13,13 +14,5 @@ class Game extends GameApi {
     this.logger?.info("Intializing Test Game");
   };
 
-  loop = (): void => {
-    console.log("LOOP");
-    this.logger?.warn("A");
-    this.idx++;
-
-    if (this.idx > 12) {
-      this.exit();
-    }
-  };
+  loop = (): void => {};
 }

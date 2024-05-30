@@ -1,0 +1,37 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "Are you *sure* you want to run slack game, [[name]] by [[author]], powered by SGL?"
+      },
+      "block_id": "sgl_runtime_confirm"
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Run! :arrow_right:",
+            "emoji": true
+          },
+          "value": "[[id]]",
+          "action_id": "sgl_runtime_confirm"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Terminate! :stop:",
+            "emoji": true
+          },
+          "value": "[[id]]",
+          "action_id": "sgl_runtime_terminate"
+        }
+      ]
+    }
+  ]
+}

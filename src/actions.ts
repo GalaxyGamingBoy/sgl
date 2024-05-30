@@ -25,7 +25,7 @@ export interface Action {
 const actions: Action[] = [];
 actions.push({
   id: "sgl-home-browse",
-  action: async (ack, body, client, logger) => {
+  action: async (ack, body, client) => {
     await ack();
 
     const query = await db.select().from(games);
@@ -45,8 +45,8 @@ actions.push({
       })
       .flat();
 
-    let modal: {
-      blocks: Object[];
+    const modal: {
+      blocks: object[];
     } = { ...modalLibrary };
 
     modal.blocks = gamesBlock;
@@ -60,21 +60,21 @@ actions.push({
 
 actions.push({
   id: "sgl-home-saveddata",
-  action: async (ack, body, client, logger) => {
+  action: async (ack) => {
     await ack();
   },
 });
 
 actions.push({
   id: "sgl-home-developgames",
-  action: async (ack, body, client, logger) => {
+  action: async (ack) => {
     await ack();
   },
 });
 
 actions.push({
   id: "sgl-progreference",
-  action: async (ack, body, client, logger) => {
+  action: async (ack) => {
     await ack();
   },
 });
