@@ -130,6 +130,7 @@ server.post("/slack/runtime/interactivity", (req: Request, res: Response) => {
       );
 
       bootstrapper?.terminate();
+      bootstrappers.delete(payload.actions[0].value)
     }
   }
 
